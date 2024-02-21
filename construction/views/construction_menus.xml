@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="construction_management_menu_root" name="Construction Management">
+        <menuitem id="construction_management_first_level_menu" name="Dashboard">
+            <menuitem id="construction_management_menu_action"
+                action="construction_management_action" />
+        </menuitem>
+        <menuitem id="construction_management_setting_first_level_menu" name="Settings">
+            <menuitem id="construction_management_tag_menu_action"
+                action="construction_management_tag_action" />
+        </menuitem>
+    </menuitem>
+</odoo>
