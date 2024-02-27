@@ -62,6 +62,13 @@
                             <field name="tag_ids" string="Tags" widget="many2many_tags"
                                 options="{'color_field':'color'}" placeholder="specify your tags..." />
                         </div>
+                        <div
+                            style="align-items:centre;display:flex;margin-top:10px;margin-bottom:10px;">
+                            <h5 style="margin-right:20px;">Construction Type</h5>
+                            <field name="construction_type_id"
+                                string="Construction Type"
+                                options="{'no_create':True,'no_open':True}" />
+                        </div>
                     </div>
                     <group>
                         <group>
@@ -87,7 +94,7 @@
                                 <hr style="width: 100%; margin-top: 0.1em; margin-bottom: 0.0em;" />
                             </div>
                             <seperator />
-                            <field name="tenure" string="Tenure (months)" style="margin-top:-5px;"/>
+                            <field name="tenure" string="Tenure (months)" style="margin-top:-5px;" />
                             <!-- <seperator /> -->
                             <field name="start_date" string="Start Date" />
                             <field name="end_date" string="End Date" />
@@ -100,7 +107,8 @@
                             <seperator />
                             <field name="client_budget" string="Client Budget" />
                             <field name="contractor_budget" string="Contractor Budget" />
-                            <field name="best_offer" string="Best Offer" />
+                            <field name="pending_amount" string="Pending Amount"
+                                invisible="state in ['new','offer_received']" />
                         </group>
                     </group>
 
@@ -122,8 +130,10 @@
                             </group>
                         </page>
                         <page string="Property Images">
-                            <field name="image" string="Property Image" widget="image"
-                                style="height:50px;width:50px;" />
+                            <group>
+                                <field name="image" widget="image"
+                                    options="{'size': (200, 250)}" />
+                            </group>
                         </page>
                         <page string="Offers">
                             <field name="offer_ids"
@@ -134,6 +144,9 @@
                                 <field name="client_id" string="Client" />
                                 <field name="contractor_id" string="Contractor" />
                             </group>
+                        </page>
+                        <page string="Payments" invisible="state in ['new','offer_received']">
+                            <field name="payment_ids" readonly="pending_amount == 0" />
                         </page>
                     </notebook>
                 </sheet>

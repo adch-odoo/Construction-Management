@@ -48,19 +48,33 @@ class ConstructionManagement(models.Model):
         copy=False,
         required=True,
     )
-    best_offer = fields.Integer(string="Best Offer", compute="_compute_best_offer")
+    pending_amount = fields.Float(
+        string="Pending Amount", compute="_compute_pending_amount"
+    )
     client_id = fields.Many2one(
         "res.users", string="Client", default=lambda self: self.env.user
     )
     contractor_id = fields.Many2one("res.partner", string="Contractor", copy=False)
-    image = fields.Binary(string="Property Image")
+    image = fields.Binary(string="Images")
 
+    construction_type_id = fields.Many2one(
+        "construction.management.type", string="Construction Type"
+    )
+
+    construction_contractor_id = fields.Many2one(
+        "construction.management.contractor", string="Contractor"
+    )
+    
     tag_ids = fields.Many2many(
         "construction.management.tag", string="Construction Tags"
     )
 
     offer_ids = fields.One2many(
-        "construction.management.offer", "property_id", string="Offers"
+        "construction.management.offer", "construction_id", string="Offers"
+    )
+
+    payment_ids = fields.One2many(
+        "construction.management.payment", "construction_id", string="Payments"
     )
 
     _sql_constraints = [
@@ -85,14 +99,11 @@ class ConstructionManagement(models.Model):
             self.garden_area = 0.0
             self.garden_orientation = ""
 
-    @api.depends("offer_ids.offer_price")
-    def _compute_best_offer(self):
-        for record in self:
-            offer_prices = record.offer_ids.mapped("offer_price")
-            if offer_prices:
-                record.best_offer = max(offer_prices, default=0)
-            else:
-                record.best_offer = 0.0
+    @api.depends("payment_ids.amount", "contractor_budget")
+    def _compute_pending_amount(self):
+        for recrod in self:
+            total_payments = sum(recrod.payment_ids.mapped("amount"))
+            recrod.pending_amount = recrod.contractor_budget - total_payments
 
     @api.depends("garden_area", "living_area")
     def _compute_total_area(self):
@@ -127,6 +138,8 @@ class ConstructionManagement(models.Model):
 
     @api.model
     def create(self, vals):
-        seq_value = self.env["ir.sequence"].next_by_code("construction.management.contract_id")
+        seq_value = self.env["ir.sequence"].next_by_code(
+            "construction.management.contract_id"
+        )
         vals["contract_id"] = seq_value
         return super().create(vals)

@@ -20,8 +20,8 @@ class ConstructionManagementOffer(models.Model):
         inverse="_inverse_offer_deadline",
     )
     validity = fields.Integer(string="Validity", default=7)
-    property_id = fields.Many2one(
-        "construction.management", required=True, string="Property Id"
+    construction_id = fields.Many2one(
+        "construction.management", required=True, string="Constrcution Id"
     )
 
     _sql_constraints = [
@@ -34,9 +34,9 @@ class ConstructionManagementOffer(models.Model):
     @api.model
     def create(self, vals):
         offer = super().create(vals)
-        offer.property_id.state="offer_received"
+        offer.construction_id.state="offer_received"
         existing_offers = self.search(
-            [("property_id", "=", offer.property_id.id), ("id", "!=", offer.id)]
+            [("construction_id", "=", offer.construction_id.id), ("id", "!=", offer.id)]
         )
         for record in existing_offers:
             if offer.offer_price > record.offer_price:
@@ -44,11 +44,11 @@ class ConstructionManagementOffer(models.Model):
         return offer
 
     def unlink(self):
-        property_ids = self.mapped("property_id")
+        construction_ids = self.mapped("construction_id")
         super().unlink()
-        for record in property_ids:
+        for record in construction_ids:
             remaining_offers = self.env["construction.management.offer"].search(
-                [("property_id", "=", record.id)]
+                [("construction_id", "=", record.id)]
             )
             if not remaining_offers:
                 record.state = "new"
@@ -74,30 +74,30 @@ class ConstructionManagementOffer(models.Model):
 
     def construction_management_offer_action_accept(self):
         for record in self:
-            if record.property_id.contractor_budget != 0.0:
+            if record.construction_id.contractor_budget != 0.0:
                 raise UserError("Can not accept more than one offer")
             else:
-                property_id = record.property_id
-                property_offers = self.env["construction.management.offer"].search(
+                construction_id = record.construction_id
+                construction_offers = self.env["construction.management.offer"].search(
                     [
                         ("id", "!=", record.id),
-                        ("property_id", "=", property_id.id),
+                        ("construction_id", "=", construction_id.id),
                     ]
                 )
-                property_offers.write({"status": "refused"})
+                construction_offers.write({"status": "refused"})
                 record.status = "accepted"
-                property_id.state = "offer_accepted"
-                property_id.contractor_budget = record.offer_price
-                property_id.contractor_id = record.partner_id
-                property_id.start_date = record.expected_start_date
-                property_id.end_date = record.expected_start_date + timedelta(days = 30 * property_id.tenure)
+                construction_id.state = "offer_accepted"
+                construction_id.contractor_budget = record.offer_price
+                construction_id.contractor_id = record.partner_id
+                construction_id.start_date = record.expected_start_date
+                construction_id.end_date = record.expected_start_date + timedelta(days = 30 * construction_id.tenure)
         return True
 
     def construction_management_offer_action_refuse(self):
         for record in self:
             record.status = "refused"
-            record.property_id.contractor_budget = 0.0
-            record.property_id.contractor_id = False
-            record.property_id.start_date=""
-            record.property_id.end_date = ""
+            record.construction_id.contractor_budget = 0.0
+            record.construction_id.contractor_id = False
+            record.construction_id.start_date=""
+            record.construction_id.end_date = ""
         return True

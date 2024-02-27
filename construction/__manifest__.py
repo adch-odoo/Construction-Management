@@ -13,10 +13,13 @@
     "data": [
         "security/ir.model.access.csv",
         "data/construction_management_sequence.xml",
-        "views/construction_management_tag_views.xml",
+        "views/construction_management_contractor_views.xml",
+        "views/construction_management_payment_views.xml",
         "views/construction_management_offer_views.xml",
+        "views/construction_management_tag_views.xml",
+        "views/construction_management_type_views.xml",
         "views/construction_management_views.xml",
-        "views/construction_menus.xml"
+        "views/construction_menus.xml",
     ],
     "license": "LGPL-3",
 }
